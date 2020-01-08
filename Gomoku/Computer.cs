@@ -17,19 +17,22 @@ namespace Gomoku
             this.nCols = nCols;
         }
 
-        public int GetScore(int r, int c, bool isMax, int depth = 1)
+        public int GetScore(int r, int c, bool isMax, int alpha, int beta, int depth = 1)
         {
-            int attackScore = game.EvaluateAttack(r, c);
-            if (attackScore < 0)
-                attackScore = 0;
-            int defenseScore = game.EvaluateDefense(r, c);
-            if (defenseScore < 0)
-                defenseScore = 0;
-            int score = attackScore + defenseScore;
-            if (game.CheckDraw() || score == 0)
+            if (game.CheckWin(r, c))
+            {
+                return (isMax ? -1 : 1) * 100000000 - depth;
+            }
+            
+            if (game.CheckDraw())
                 return 0;
             if (depth == maxDepth)
-                return (isMax?-1:1)*score / depth;
+            {
+                int score = game.EvaluateAttack(r, c) + game.EvaluateDefense(r, c);
+                if (score < 0)
+                    score = 0;
+                return (isMax ? -1 : 1) * score - depth;
+            }
             if (isMax)
             {
                 int maxValue = int.MinValue;
@@ -40,8 +43,11 @@ namespace Gomoku
                         if (game.IsEmpty(i, j))
                         {
                             game.NextMove(i, j);
-                            maxValue = Math.Max(maxValue, GetScore(i, j, false, depth + 1));
+                            maxValue = Math.Max(maxValue, GetScore(i, j, false, alpha, beta, depth + 1));
                             game.RemoveMove(i, j);
+                            alpha = Math.Max(alpha, maxValue);
+                            if (beta <= alpha)
+                                return maxValue;
                         }
                     }
                 }
@@ -57,8 +63,11 @@ namespace Gomoku
                         if (game.IsEmpty(i, j))
                         {
                             game.NextMove(i, j);
-                            minValue = Math.Min(minValue, GetScore(i, j, true, depth + 1));
+                            minValue = Math.Min(minValue, GetScore(i, j, true, alpha, beta, depth + 1));
                             game.RemoveMove(i, j);
+                            beta = Math.Min(beta, minValue);
+                            if (beta <= alpha)
+                                return minValue;
                         }
                     }
                 }
@@ -70,6 +79,9 @@ namespace Gomoku
         {
             int[] a = new int[2];
             int max = int.MinValue;
+            int alpha = int.MinValue;
+            int beta = int.MaxValue;
+            Random random = new Random();
             for (int i = 0; i < nRows; i++)
             {
                 for (int j = 0; j < nCols; j++)
@@ -77,7 +89,7 @@ namespace Gomoku
                     if(game.IsEmpty(i,j))
                     {
                         game.NextMove(i, j);
-                        int value = GetScore(i, j, false);
+                        int value = GetScore(i, j, false, alpha, beta) + random.Next(-2, 3);
                         buttonBoard[i, j].Content = value.ToString();
                         game.RemoveMove(i, j);
                         if(value>max)
@@ -86,6 +98,7 @@ namespace Gomoku
                             a[0] = i;
                             a[1] = j;
                         }
+                        alpha = Math.Max(alpha, max);
                     }
                     else
                     {

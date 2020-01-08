@@ -29,7 +29,7 @@
     
     <DockPanel>
         <Menu DockPanel.Dock="Top" Height="20">
-            <MenuItem Header="File" BorderBrush="Black">
+            <MenuItem Header="File">
                 <MenuItem Header="New Game">
                     <MenuItem Header="Computer First" Click="NewGameComputer"/>
                     <MenuItem Header="You First" Click="NewGamePlayer"/>
@@ -39,7 +39,7 @@
                 <Separator/>
                 <MenuItem Header="Exit" Click="Exit"/>
             </MenuItem>
-            <MenuItem Header="Edit" BorderBrush="Black">
+            <MenuItem Header="Edit">
                 <MenuItem Header="Undo" Click="Undo"/>
                 <MenuItem Header="Redo"/>
             </MenuItem>

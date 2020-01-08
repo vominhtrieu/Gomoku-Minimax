@@ -135,6 +135,7 @@ namespace Gomoku
             listMoveX.Push(pos[1]);
 
             buttonBoard[pos[0], pos[1]].Background = gameLogic.isXMove ? OSource : XSource;
+            
             if (gameLogic.CheckWin(pos[0], pos[1]))
             {
                 MessageBox.Show(Application.Current.MainWindow, "Computer won", "End Game");
@@ -186,6 +187,7 @@ namespace Gomoku
         {
             if (listMoveX.Count <= 1)
                 return;
+            mainGrid.IsEnabled = true;
             int x = listMoveX.Pop();
             int y = listMoveY.Pop();
             gameLogic.RemoveMove(y, x);
