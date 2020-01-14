@@ -19,7 +19,7 @@ namespace Gomoku
     /// </summary>
     public partial class SettingWindow : Window
     {
-        int index = 1;
+        int index = 3;
         public SettingWindow()
         {
             InitializeComponent();
@@ -30,7 +30,7 @@ namespace Gomoku
             }
             else
             {
-                index = 1;
+                index = 3;
             }
 
             for(int i = 1; i <= 5; i++)

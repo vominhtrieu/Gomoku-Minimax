@@ -39,7 +39,7 @@ namespace Gomoku
             Application.Current.MainWindow.Height = nRows * 30 + 20;
             Application.Current.MainWindow.Width = nCols * 30;
             gameLogic = new GameLogic(nRows, nCols, 2);
-            int comLV = 1;
+            int comLV = 3;
             if (File.Exists("setting.cfg"))
             {
                 FileStream file = new FileStream("setting.cfg", FileMode.Open, FileAccess.Read);
@@ -49,7 +49,7 @@ namespace Gomoku
             else
             {
                 FileStream file = new FileStream("setting.cfg", FileMode.OpenOrCreate, FileAccess.Write);
-                file.WriteByte(1);
+                file.WriteByte((byte)comLV);
                 file.Close();
             }
             computer = new Computer(gameLogic, comLV);
