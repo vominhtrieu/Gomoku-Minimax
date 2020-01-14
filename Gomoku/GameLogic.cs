@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Gomoku
 {
     class GameLogic
     {
         int[,] matrix;
-        int nRows, nCols, filledCount;
+        int comChess;
+        int nRows, nCols, turn;
         
         public bool isXMove { get; private set; }
 
-        public GameLogic(int nRows, int nCols)
+        public GameLogic(int nRows, int nCols, int comChess)
         {
             matrix = new int[nRows, nCols];
             isXMove = true;
@@ -22,7 +24,8 @@ namespace Gomoku
                     matrix[i, j] = 0;
                 }
             }
-            filledCount = 0;
+            turn = 0;
+            this.comChess = comChess;
         }
 
         public bool IsEmpty(int r, int c)
@@ -35,14 +38,14 @@ namespace Gomoku
             matrix[r, c] = isXMove ? 1 : 2;
 
             isXMove = !isXMove;
-            filledCount++;
+            turn++;
         }
 
         public void RemoveMove(int r, int c)
         {
             matrix[r, c] = 0;
             isXMove = !isXMove;
-            filledCount--;
+            turn--;
         }
 
         #region Winning Check
@@ -156,15 +159,16 @@ namespace Gomoku
 
 
         #region Evaluate
-        static readonly int[] AttackScore = { 0, 2, 30, 450, 6750, 101250 };
-        static readonly int[] DefenseScore = { 0, 1, 15, 225, 3375, 50625 };
+        static readonly int[] AttackScore = { 0, 2, 30, 450, 6750, 101250 , 100000000};
+        static readonly int[] DefenseScore = { 0, 1, 15, 225, 3375, 50625 , 100000000};
 
+        #region Evaluate Attack
         int EvaluateAttackHorizontal(int r, int c)
         {
             int cur = c - 1;
             int chessCount = 1;
             int blockedEnd = 0;
-
+            int deadEnd = 0;
             while (cur >= 0 && matrix[r, cur] == matrix[r, c])
             {
                 chessCount++;
@@ -272,6 +276,9 @@ namespace Gomoku
         {
             return EvaluateAttackHorizontal(r, c) + EvaluateAttackVertical(r, c) + EvaluateAttackMainDiagonal(r, c) + EvaluateAttackSubDiagonal(r, c);
         }
+        #endregion
+
+        #region Evaluate Defense
 
         int EvaluateDefenseHorizontal(int r, int c)
         {
@@ -391,9 +398,88 @@ namespace Gomoku
         }
         #endregion
 
+        public int EvaluateBoard()
+        {
+            int maxComScore = int.MinValue;
+            for(int i = 0; i < nRows; i++)
+            {
+                for(int j = 0; j < nCols; j++)
+                {
+                    if(matrix[i, j] == 0)
+                    {
+                        matrix[i, j] = comChess;
+                        maxComScore = Math.Max(maxComScore, EvaluateAttack(i, j));
+                        matrix[i, j] = 0;
+                    }
+                }
+            }
+
+            int playerChess = comChess == 1 ? 2 : 1;
+            int maxPlayerScore = int.MinValue;
+            for (int i = 0; i < nRows; i++)
+            {
+                for (int j = 0; j < nCols; j++)
+                {
+                    if (matrix[i, j] == 0)
+                    {
+                        matrix[i, j] = playerChess;
+                        maxPlayerScore = Math.Max(maxPlayerScore, EvaluateAttack(i, j));
+                        matrix[i, j] = 0;
+                    }
+                }
+            }
+
+            return maxComScore - maxPlayerScore;
+        }
+        #endregion
+
+        public List<int[]> GetPossibleMoves(int number, int turn)
+        {
+            int[,] scoreMatrix = new int[nRows, nCols];
+            for(int i = 0; i < nRows; i ++)
+            {
+                for(int j = 0; j < nCols; j++)
+                {
+                    if (matrix[i, j] != 0)
+                        scoreMatrix[i, j] = 0;
+                    else
+                    {
+                        matrix[i, j] = turn;
+                        scoreMatrix[i, j] = EvaluateAttack(i, j) + EvaluateDefense(i, j);
+                        matrix[i, j] = 0;
+                    }
+                }
+            }
+
+            List<int[]> result = new List<int[]>(nRows * nCols);
+            int n = turn == 2 ? 8 : number;
+            for(int i = 0; i < n; i++)
+            {
+                int max = int.MinValue;
+                int r = 0, c = 0;
+                for(int j = 0; j < nRows; j++)
+                {
+                    for(int k = 0; k < nCols; k++)
+                    {
+                        if(max < scoreMatrix[j, k])
+                        {
+                            r = j;
+                            c = k;
+                            max = scoreMatrix[j, k];
+                        }
+                    }
+                }
+                if (max == 0)
+                    return result;
+                result.Add(new int[] { r, c });
+                scoreMatrix[r, c] = 0;
+            }
+            return result;
+        }
+
         public bool CheckDraw()
         {
-            return filledCount == (nRows * nCols);
+            return turn == (nRows * nCols);
         }
     }
 }

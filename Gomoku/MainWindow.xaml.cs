@@ -23,33 +23,25 @@ namespace Gomoku
     public partial class MainWindow : Window
     {
         //const int nRows = 15, nCols = 15;
-        const int nRows = 15, nCols = 15;
-        ImageBrush XSource, OSource;
+        const int nRows = 17, nCols = 13;
         GameLogic gameLogic;
         Computer computer;
         Button[,] buttonBoard;
         Stack<int> listMoveX;
         Stack<int> listMoveY;
-
+        Uri xResourceUri;
+        Uri oResourceUri;
         void InitializeButton()
         {
-            gameLogic = new GameLogic(nRows, nCols);
+            Application.Current.MainWindow.Height = nRows * 30 + 20;
+            Application.Current.MainWindow.Width = nCols * 30;
+            gameLogic = new GameLogic(nRows, nCols, 2);
             computer = new Computer(gameLogic, nRows, nCols);
             buttonBoard = new Button[nRows, nCols];
             listMoveX = new Stack<int>();
             listMoveY = new Stack<int>();
-
-            Uri xResourceUri = new Uri("Resources/Cross.png", UriKind.Relative);
-            Uri oResourceUri = new Uri("Resources/Circle.png", UriKind.Relative);
-            StreamResourceInfo streamInfoX = Application.GetResourceStream(xResourceUri);
-            StreamResourceInfo streamInfoO = Application.GetResourceStream(oResourceUri);
-
-            BitmapFrame temp1 = BitmapFrame.Create(streamInfoX.Stream);
-            BitmapFrame temp2 = BitmapFrame.Create(streamInfoO.Stream);
-            XSource = new ImageBrush();
-            OSource = new ImageBrush();
-            XSource.ImageSource = temp1;
-            OSource.ImageSource = temp2;
+            xResourceUri = new Uri("Resources/Cross.png", UriKind.Relative);
+            oResourceUri = new Uri("Resources/Circle.png", UriKind.Relative);
 
             GridLengthConverter gridLengthConverter = new GridLengthConverter();
             ThicknessConverter thicknessConverter = new ThicknessConverter();
@@ -98,29 +90,27 @@ namespace Gomoku
             if (!gameLogic.IsEmpty(r, c))
                 return;
             ApplyMove(r, c);
-            ComputerNextMove();
-        }
-
-        public void ApplyMove(int r, int c)
-        {
-            listMoveY.Push(r);
-            listMoveX.Push(c);
-            if (gameLogic.isXMove)
-            {
-                buttonBoard[r, c].Background = XSource;
-            }
-            else
-            {
-                buttonBoard[r, c].Background = OSource;
-            }
-
-            gameLogic.NextMove(r, c);
-
             if (gameLogic.CheckWin(r, c))
             {
                 MessageBox.Show(Application.Current.MainWindow, "Player won", "End Game");
                 mainGrid.IsEnabled = false;
             }
+            ComputerNextMove();
+        }
+
+        public void ApplyMove(int r, int c)
+        {
+            if(listMoveY.Count > 0)
+                buttonBoard[listMoveY.Peek(), listMoveX.Peek()].Background = Brushes.White;
+            listMoveY.Push(r);
+            listMoveX.Push(c);
+
+            Image Source = new Image();
+            Source.Source = new BitmapImage(gameLogic.isXMove?xResourceUri:oResourceUri);
+            buttonBoard[r, c].Background = Brushes.Yellow;
+            buttonBoard[r, c].Content = Source;
+            gameLogic.NextMove(r, c);
+
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { })).Wait();
         }
 
@@ -129,13 +119,7 @@ namespace Gomoku
             if (!mainGrid.IsEnabled)
                 return;
             int[] pos = computer.NextMove(buttonBoard);
-            gameLogic.NextMove(pos[0], pos[1]);
-
-            listMoveY.Push(pos[0]);
-            listMoveX.Push(pos[1]);
-
-            buttonBoard[pos[0], pos[1]].Background = gameLogic.isXMove ? OSource : XSource;
-            
+            ApplyMove(pos[0], pos[1]);
             if (gameLogic.CheckWin(pos[0], pos[1]))
             {
                 MessageBox.Show(Application.Current.MainWindow, "Computer won", "End Game");
@@ -152,10 +136,11 @@ namespace Gomoku
                 {
                     Button btn = (Button)o;
                     btn.Background = Brushes.White;
+                    btn.Content = "";
                 }
             }
 
-            gameLogic = new GameLogic(nRows, nCols);
+            gameLogic = new GameLogic(nRows, nCols, isComputerTurn?1:2);
             computer = new Computer(gameLogic, nRows, nCols);
             listMoveX = new Stack<int>();
             listMoveY = new Stack<int>();
@@ -192,11 +177,14 @@ namespace Gomoku
             int y = listMoveY.Pop();
             gameLogic.RemoveMove(y, x);
             buttonBoard[y, x].Background = Brushes.White;
+            buttonBoard[y, x].Content = "";
 
             x = listMoveX.Pop();
             y = listMoveY.Pop();
             gameLogic.RemoveMove(y, x);
             buttonBoard[y, x].Background = Brushes.White;
+            buttonBoard[y, x].Content = "";
+            buttonBoard[listMoveY.Peek(), listMoveX.Peek()].Background = Brushes.Yellow;
         }
 
         public MainWindow()

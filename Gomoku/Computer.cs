@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Controls;
 
 namespace Gomoku
@@ -8,7 +9,8 @@ namespace Gomoku
         //List<List<int>> matrix;
         GameLogic game;
         int nRows, nCols;
-        int maxDepth = 1;
+        int maxDepth = 6;
+        int maxMoveSearch = 20;
 
         public Computer(GameLogic game, int nRows, int nCols)
         {
@@ -21,55 +23,45 @@ namespace Gomoku
         {
             if (game.CheckWin(r, c))
             {
-                return (isMax ? -1 : 1) * 100000000 - depth;
+                return (isMax ? -1 : 1) * (100000000 - 5000*depth);
             }
             
             if (game.CheckDraw())
                 return 0;
             if (depth == maxDepth)
             {
-                int score = game.EvaluateAttack(r, c) + game.EvaluateDefense(r, c);
-                if (score < 0)
-                    score = 0;
-                return (isMax ? -1 : 1) * score - depth;
+                return game.EvaluateBoard() * (100 - 2*depth) / 100;
             }
+            List<int[]> moveList = game.GetPossibleMoves(maxMoveSearch, game.isXMove ? 1 : 2);
             if (isMax)
             {
                 int maxValue = int.MinValue;
-                for (int i = 0; i < nRows; i++)
+                for (int i = 0; i < moveList.Count; i++)
                 {
-                    for (int j = 0; j < nCols; j++)
-                    {
-                        if (game.IsEmpty(i, j))
-                        {
-                            game.NextMove(i, j);
-                            maxValue = Math.Max(maxValue, GetScore(i, j, false, alpha, beta, depth + 1));
-                            game.RemoveMove(i, j);
-                            alpha = Math.Max(alpha, maxValue);
-                            if (beta <= alpha)
-                                return maxValue;
-                        }
-                    }
+                    int row = moveList[i][0];
+                    int col = moveList[i][1];
+                    game.NextMove(row, col);
+                    maxValue = Math.Max(maxValue, GetScore(row, col, false, alpha, beta, depth + 1));
+                    game.RemoveMove(row, col);
+                    alpha = Math.Max(alpha, maxValue);
+                    if (beta <= alpha)
+                        return maxValue;
                 }
                 return maxValue;
             }
             else
             {
                 int minValue = int.MaxValue;
-                for (int i = 0; i < nRows; i++)
+                for (int i = 0; i < moveList.Count; i++)
                 {
-                    for (int j = 0; j < nCols; j++)
-                    {
-                        if (game.IsEmpty(i, j))
-                        {
-                            game.NextMove(i, j);
-                            minValue = Math.Min(minValue, GetScore(i, j, true, alpha, beta, depth + 1));
-                            game.RemoveMove(i, j);
-                            beta = Math.Min(beta, minValue);
-                            if (beta <= alpha)
-                                return minValue;
-                        }
-                    }
+                    int row = moveList[i][0];
+                    int col = moveList[i][1];
+                    game.NextMove(row, col);
+                    minValue = Math.Min(minValue, GetScore(row, col, true, alpha, beta, depth + 1));
+                    game.RemoveMove(row, col);
+                    beta = Math.Min(beta, minValue);
+                    if (beta <= alpha)
+                        return minValue;
                 }
                 return minValue;
             }
@@ -82,29 +74,23 @@ namespace Gomoku
             int alpha = int.MinValue;
             int beta = int.MaxValue;
             Random random = new Random();
-            for (int i = 0; i < nRows; i++)
+
+            List<int[]> moveList = game.GetPossibleMoves(maxMoveSearch, game.isXMove ? 1 : 2);
+            for (int i = 0; i < moveList.Count; i++)
             {
-                for (int j = 0; j < nCols; j++)
+                int row = moveList[i][0];
+                int col = moveList[i][1];
+                game.NextMove(row, col);
+                int value = GetScore(row, col, false, alpha, beta) + random.Next(-1, 1);
+                buttonBoard[row, col].Content = value.ToString();
+                game.RemoveMove(row, col);
+                if (value > max)
                 {
-                    if(game.IsEmpty(i,j))
-                    {
-                        game.NextMove(i, j);
-                        int value = GetScore(i, j, false, alpha, beta) + random.Next(-2, 3);
-                        buttonBoard[i, j].Content = value.ToString();
-                        game.RemoveMove(i, j);
-                        if(value>max)
-                        {
-                            max = value;
-                            a[0] = i;
-                            a[1] = j;
-                        }
-                        alpha = Math.Max(alpha, max);
-                    }
-                    else
-                    {
-                        buttonBoard[i, j].Content = "";
-                    }
+                    max = value;
+                    a[0] = row;
+                    a[1] = col;
                 }
+                alpha = Math.Max(alpha, max);
             }
             return a;
         }
