@@ -5,6 +5,15 @@ namespace Gomoku
 {
     class GameLogic
     {
+        public class Move
+        {
+            public int row, column;
+            public Move(int r, int c)
+            {
+                row = r;
+                column = c;
+            }
+        }
         int[,] matrix;
         int comChess;
         int nRows, nCols, turn;
@@ -438,7 +447,7 @@ namespace Gomoku
         }
         #endregion
 
-        public List<int[]> GetPossibleMoves(int number, int turn)
+        public List<Move> GetPossibleMoves(int number, int turn)
         {
             int[,] scoreMatrix = new int[nRows, nCols];
             for(int i = 0; i < nRows; i ++)
@@ -456,7 +465,7 @@ namespace Gomoku
                 }
             }
 
-            List<int[]> result = new List<int[]>(nRows * nCols);
+            List<Move> result = new List<Move>(nRows * nCols);
             
             for(int i = 0; i < number; i++)
             {
@@ -474,7 +483,7 @@ namespace Gomoku
                         }
                     }
                 }
-                result.Add(new int[] { r, c });
+                result.Add(new Move(r, c));
                 scoreMatrix[r, c] = 0;
             }
             return result;

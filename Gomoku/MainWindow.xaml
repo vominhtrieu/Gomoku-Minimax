@@ -34,14 +34,14 @@
                     <MenuItem Header="Computer First" Click="NewGameComputer"/>
                     <MenuItem Header="You First" Click="NewGamePlayer"/>
                 </MenuItem>
-                <MenuItem Header="Save"/>
+                <MenuItem Header="Setting" Click="OpenSetting"></MenuItem>
                 <MenuItem Header="About" Click="About"/>
                 <Separator/>
                 <MenuItem Header="Exit" Click="Exit"/>
             </MenuItem>
             <MenuItem Header="Edit">
-                <MenuItem Header="Undo" Click="Undo"/>
-                <MenuItem Header="Redo"/>
+                <MenuItem x:Name="UndoButton" Header="Undo" Click="Undo"/>
+                <MenuItem x:Name="RedoButton" Header="Redo" Click="Redo"/>
             </MenuItem>
         </Menu>
         <Grid x:Name="mainGrid">
