@@ -159,16 +159,21 @@ namespace Gomoku
 
 
         #region Evaluate
-        static readonly int[] AttackScore = { 0, 2, 30, 450, 6750, 101250 , 100000000};
-        static readonly int[] DefenseScore = { 0, 1, 15, 225, 3375, 50625 , 100000000};
+        static readonly int[] AttackScore = { 0, 2, 30, 450, 6750, 101250 , 10000000};
+        static readonly int[] DefenseScore = { 0, 1, 15, 225, 3375, 50625 , 10000000};
 
         #region Evaluate Attack
+
+        int GetAttackScore(int chessCount, int blockedEnd)
+        {
+            return AttackScore[chessCount] - DefenseScore[blockedEnd * chessCount];
+        }
+
         int EvaluateAttackHorizontal(int r, int c)
         {
             int cur = c - 1;
             int chessCount = 1;
             int blockedEnd = 0;
-            int deadEnd = 0;
             while (cur >= 0 && matrix[r, cur] == matrix[r, c])
             {
                 chessCount++;
@@ -188,7 +193,7 @@ namespace Gomoku
                 blockedEnd++;
             if (blockedEnd == 2 || chessCount > 5)
                 return 0;
-            return AttackScore[chessCount] - DefenseScore[blockedEnd * chessCount];
+            return GetAttackScore(chessCount, blockedEnd);
         }
 
         int EvaluateAttackVertical(int r, int c)
@@ -213,7 +218,7 @@ namespace Gomoku
                 blockedEnd++;
             if (blockedEnd == 2 || chessCount > 5)
                 return 0;
-            return AttackScore[chessCount] - DefenseScore[blockedEnd * chessCount];
+            return GetAttackScore(chessCount, blockedEnd);
         }
 
         int EvaluateAttackMainDiagonal(int r, int c)
@@ -241,7 +246,7 @@ namespace Gomoku
                 blockedEnd++;
             if (blockedEnd == 2 || chessCount > 5)
                 return 0;
-            return AttackScore[chessCount] - DefenseScore[blockedEnd];
+            return GetAttackScore(chessCount, blockedEnd);
         }
 
         int EvaluateAttackSubDiagonal(int r, int c)
@@ -269,7 +274,7 @@ namespace Gomoku
                 blockedEnd++;
             if (blockedEnd == 2 || chessCount > 5)
                 return 0;
-            return AttackScore[chessCount] - DefenseScore[blockedEnd * chessCount];
+            return GetAttackScore(chessCount, blockedEnd);
         }
 
         public int EvaluateAttack(int r, int c)
@@ -452,8 +457,8 @@ namespace Gomoku
             }
 
             List<int[]> result = new List<int[]>(nRows * nCols);
-            int n = turn == 2 ? 8 : number;
-            for(int i = 0; i < n; i++)
+            
+            for(int i = 0; i < number; i++)
             {
                 int max = int.MinValue;
                 int r = 0, c = 0;
@@ -469,8 +474,6 @@ namespace Gomoku
                         }
                     }
                 }
-                if (max == 0)
-                    return result;
                 result.Add(new int[] { r, c });
                 scoreMatrix[r, c] = 0;
             }

@@ -23,7 +23,7 @@ namespace Gomoku
     public partial class MainWindow : Window
     {
         //const int nRows = 15, nCols = 15;
-        const int nRows = 17, nCols = 13;
+        const int nRows = 25, nCols = 25;
         GameLogic gameLogic;
         Computer computer;
         Button[,] buttonBoard;

@@ -9,8 +9,8 @@ namespace Gomoku
         //List<List<int>> matrix;
         GameLogic game;
         int nRows, nCols;
-        int maxDepth = 6;
-        int maxMoveSearch = 20;
+        int maxDepth = 8;
+        int maxMoveSearch = 7;
 
         public Computer(GameLogic game, int nRows, int nCols)
         {
@@ -23,7 +23,7 @@ namespace Gomoku
         {
             if (game.CheckWin(r, c))
             {
-                return (isMax ? -1 : 1) * (100000000 - 5000*depth);
+                return (isMax ? -1 : 1) * (1000000000 - 5000*depth);
             }
             
             if (game.CheckDraw())
