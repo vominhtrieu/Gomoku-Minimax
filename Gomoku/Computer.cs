@@ -10,12 +10,14 @@ namespace Gomoku
         //List<List<int>> matrix;
         GameLogic game;
         int maxDepth;
-        int maxMoveSearch = 7;
+        int maxMoveSearch;
 
+        static readonly int[] maxMoveSearchLV = { 7, 7, 7, 7, 7, 20 };
+        static readonly int[] maxDepthLV = { 1, 1, 3, 6, 8, 6 };
         public Computer(GameLogic game, int lv)
         {
             this.game = game;
-            maxDepth = lv * 2 - 1;
+            ChangeLV(lv);
         }
 
         public int GetScore(int r, int c, bool isMax, int alpha, int beta, int depth = 1)
@@ -69,7 +71,8 @@ namespace Gomoku
 
         public void ChangeLV(int lv)
         {
-            maxDepth = lv * 2 - 1;
+            maxDepth = maxDepthLV[lv];
+            maxMoveSearch = maxMoveSearchLV[lv];
         }
         public Move NextMove()
         {

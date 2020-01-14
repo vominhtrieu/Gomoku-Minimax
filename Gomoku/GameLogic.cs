@@ -447,7 +447,7 @@ namespace Gomoku
         }
         #endregion
 
-        public List<Move> GetPossibleMoves(int number, int turn)
+        public List<Move> GetPossibleMoves(int number, int chess)
         {
             int[,] scoreMatrix = new int[nRows, nCols];
             for(int i = 0; i < nRows; i ++)
@@ -458,13 +458,14 @@ namespace Gomoku
                         scoreMatrix[i, j] = 0;
                     else
                     {
-                        matrix[i, j] = turn;
+                        matrix[i, j] = chess;
                         scoreMatrix[i, j] = EvaluateAttack(i, j) + EvaluateDefense(i, j);
                         matrix[i, j] = 0;
                     }
                 }
             }
-
+            if (turn < 5)
+                number = 7;
             List<Move> result = new List<Move>(nRows * nCols);
             
             for(int i = 0; i < number; i++)
