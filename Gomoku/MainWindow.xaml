@@ -28,7 +28,7 @@
     </Window.Resources>
     
     <DockPanel>
-        <Menu DockPanel.Dock="Top" Height="20">
+        <Menu DockPanel.Dock="Top" Height="20" x:Name="MainMenu">
             <MenuItem Header="File">
                 <MenuItem Header="New Game">
                     <MenuItem Header="Computer First" Click="NewGameComputer"/>

@@ -13,7 +13,7 @@ namespace Gomoku
         int maxMoveSearch;
 
         static readonly int[] maxMoveSearchLV = { 7, 7, 7, 7, 7, 20 };
-        static readonly int[] maxDepthLV = { 1, 1, 3, 6, 8, 6 };
+        static readonly int[] maxDepthLV = { 1, 1, 3, 6, 8, 7 };
         public Computer(GameLogic game, int lv)
         {
             this.game = game;
@@ -88,7 +88,7 @@ namespace Gomoku
                 int row = moveList[i].row;
                 int col = moveList[i].column;
                 game.NextMove(row, col);
-                int value = GetScore(row, col, false, alpha, beta) + random.Next(-1, 1);
+                int value = GetScore(row, col, false, alpha, beta) + random.Next(-1, 2);
                 game.RemoveMove(row, col);
                 if (value > max)
                 {

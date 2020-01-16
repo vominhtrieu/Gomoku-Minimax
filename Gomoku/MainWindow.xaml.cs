@@ -113,7 +113,11 @@ namespace Gomoku
                 MessageBox.Show(Application.Current.MainWindow, "Player won", "End Game");
                 mainGrid.IsEnabled = false;
             }
-            ComputerNextMove();
+            if (mainGrid.IsEnabled)
+            {
+                Thread thread = new Thread(ComputerNextMove);
+                thread.Start();
+            }
             UndoButton.IsEnabled = true;
             redoMoves.Clear();
         }
@@ -135,15 +139,23 @@ namespace Gomoku
 
         private void ComputerNextMove()
         {
-            if (!mainGrid.IsEnabled)
-                return;
-            Move move = computer.NextMove();
-            ApplyMove(move.row, move.column);
-            if (gameLogic.CheckWin(move.row, move.column))
+            Dispatcher.Invoke((Action)(() =>
             {
-                MessageBox.Show(Application.Current.MainWindow, "Computer won", "End Game");
+                MainMenu.IsEnabled = false;
                 mainGrid.IsEnabled = false;
-            }
+            }));
+            Move move = computer.NextMove();
+            Dispatcher.Invoke((Action)(() =>
+            {
+                mainGrid.IsEnabled = true;
+                ApplyMove(move.row, move.column);
+                if (gameLogic.CheckWin(move.row, move.column))
+                {
+                    MessageBox.Show(Application.Current.MainWindow, "Computer won", "End Game");
+                    mainGrid.IsEnabled = false;
+                }
+                MainMenu.IsEnabled = true;
+            }));
         }
 
         private void NewGame(bool isComputerTurn)
